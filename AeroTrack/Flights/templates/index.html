@@ -1,0 +1,158 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AeroTrack</title>
+    <link rel="stylesheet" href="{% static "style.css" %}">
+    <link rel="stylesheet" href="{% static "tailwind.css" %}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="space-grotesk bg-gray-100">
+    <nav class="bg-white fixed w-full top-0 z-50 p-6 flex justify-between items-center px-16 border-b shadow-xl">
+        
+        <p class="text-3xl font-bold text-gray-800 tracking-wide hover:text-blue-900 transition duration-300">
+            AeroTrack
+        </p>
+        <div class="hidden md:flex space-x-10">
+            <a href="index.html" class="flex space-x-2 items-center text-lg text-gray-800 hover:bg-blue-900 hover:text-white px-4 py-2 rounded-lg transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
+                  <div class="ml-1">Home</div></a>
+            <a href="flights.html" class="flex space-x-2 items-center text-lg text-gray-800 hover:bg-blue-900 hover:text-white px-4 py-2 rounded-lg transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m6.115 5.19.319 1.913A6 6 0 0 0 8.11 10.36L9.75 12l-.387.775c-.217.433-.132.956.21 1.298l1.348 1.348c.21.21.329.497.329.795v1.089c0 .426.24.815.622 1.006l.153.076c.433.217.956.132 1.298-.21l.723-.723a8.7 8.7 0 0 0 2.288-4.042 1.087 1.087 0 0 0-.358-1.099l-1.33-1.108c-.251-.21-.582-.299-.905-.245l-1.17.195a1.125 1.125 0 0 1-.98-.314l-.295-.295a1.125 1.125 0 0 1 0-1.591l.13-.132a1.125 1.125 0 0 1 1.3-.21l.603.302a.809.809 0 0 0 1.086-1.086L14.25 7.5l1.256-.837a4.5 4.5 0 0 0 1.528-1.732l.146-.292M6.115 5.19A9 9 0 1 0 17.18 4.64M6.115 5.19A8.965 8.965 0 0 1 12 3c1.929 0 3.716.607 5.18 1.64" />
+                  </svg>
+                  <div class="ml-1">Flights</div></a>
+            <a href="about.html" class="flex space-x-2 items-center text-lg text-gray-800 hover:bg-blue-900 hover:text-white px-4 py-2 rounded-lg transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                  <div class="ml-1">About</div></a>
+        </div>
+
+        <div class="md:hidden">
+            <button class="text-gray-800 focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+    </nav>
+    
+
+    <div class="">
+
+        <section class="relative bg-cover bg-center h-screen bg-[url('/assets/hero-image.jpg')]">
+            <div class="absolute inset-0 bg-black opacity-40"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white">
+                <h1 class="text-4xl md:text-6xl mb-16 font-bold">Aprende la mejor ruta para tus viajes</h1>
+                <div class="space-x-4">
+                    <a href="#" class="px-6 py-2 bg-white text-black font-semibold rounded hover:bg-gray-200">Ir a la aplicacion</a>
+                    <a href="#members" class="px-6 py-2 bg-transparent border border-white text-white font-semibold rounded hover:bg-white hover:text-black">Integrantes</a>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex flex-col md:flex-row mx-4 md:mx-16 items-center justify-center my-8">
+                <div class="w-full md:w-1/2 p-4">
+                    <div class="bg-white rounded-lg shadow-lg p-8 transform transition-all hover:shadow-2xl hover:scale-105 duration-300">
+                        <h2 class="text-2xl font-bold mb-4">Problematica</h2>
+                        <p class="text-gray-700 mb-6"></p>
+                            Actualmente el tráfico aéreo en el Perú enfrenta varios problemas críticos relacionados con la gestión y la infraestructura. El principal aeropuerto del país, Jorge Chávez, ha sido escenario de demoras constantes debido a la necesidad de modernizar tanto su pista como su infraestructura general. Uno de los principales factores es la falta de equipamiento moderno y la separación estricta entre vuelos, que ha sido impuesta en gran parte debido a huelgas y protestas de los controladores aéreos. Estas acciones han resultado en retrasos importantes, afectando tanto vuelos domésticos como internacionales.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 p-4 flex justify-center">
+                    <img src="{% static "assets/problematica-image.jpg" %}" class="rounded-lg w-4/5 transform drop-shadow-xl hover:scale-105 transition-all duration-300">
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-blue-900 flex flex-col text-white justify-center py-20 items-center w-full">
+            <div class="text-white text-5xl font-bold text-center mb-8">
+                Objetivo
+            </div>
+        
+            <div class="w-4/5">
+                <p class="text-center text-lg text-white">
+                    El objetivo principal de este proyecto es desarrollar una solución basada en algoritmos para 
+                    mejorar la gestión del control aéreo en el Perú. En particular, se busca optimizar la asignación 
+                    de pistas para vuelos entrantes y salientes, considerando los tiempos de ocupación de las pistas 
+                    y los horarios estimados de los vuelos. Esta solución se enfocará inicialmente en el aeropuerto 
+                    Jorge Chávez, con la posibilidad de extenderla a aeropuertos en provincias en el futuro.
+                </p>
+            </div>
+        </section>
+        
+
+    </div>
+
+    
+    <section class="bg-gray-100 py-20" id="members">
+        <h2 class="text-black text-5xl font-bold mb-12 text-center">
+                Integrantes
+            </h2>
+        <div class="bg-gray-100 gap-16 flex-wrap flex justify-center items-center">
+            <!-- Card -->
+            <div class="w-60 p-4 bg-white rounded-xl transform transition-all hover:-translate-y-2 duration-200 shadow-lg hover:shadow-2xl">
+              <!-- Image -->
+              <img class="h-30 object-cover rounded-xl w-60 h-40" src="{% static "assets/Sebastian.png" %}" alt="Integrante Sebastian Ramírez">
+              <div class="p-2">
+              <!-- Heading -->
+              <h2 class="font-bold text-lg mb-2 ">Sebastián Ramírez</h2>
+              <!-- Description -->
+              <p class="text-sm text-gray-600">• Conocimientos en programación <br>• Conceptos de diseño front y back.<br>• Proactivo </br>• Responsable</p>
+              </div>
+              <!-- GitHub -->
+              <div class="m-2 text-center">
+                <a role='button' href='https://github.com/SEBRH' target="_blank" class="text-white bg-blue-900 px-3 py-1 rounded-md hover:bg-blue-700">Saber más</a>
+              </div>
+            </div>
+              <!-- Card -->
+            <div class="w-60 p-4 bg-white rounded-xl transform transition-all hover:-translate-y-2 duration-200 shadow-lg hover:shadow-2xl">
+              <!-- Image -->
+              <img class="h-30 object-cover rounded-xl w-60 h-40" src="{% static "assets/Augusto.jpg" %}" alt="Integrante Augusto Pin">
+              <div class="p-2">
+              <!-- Heading -->
+              <h2 class="font-bold text-lg mb-2 ">Augusto Pin</h2>
+              <!-- Description -->
+              <p class="text-sm text-gray-600">• Conocimientos de programación C++, Python, etc. <br>• Escucha activa <br>•Flexibilidad e innovación <br>• Responsable</p>
+              </div>
+              <!-- GitHub -->
+              <div class="m-2 text-center">
+                <a role='button' href='https://github.com/GutoPin' target="_blank" class="text-white bg-blue-900 px-3 py-1 rounded-md hover:bg-blue-700">Saber más</a>
+                </div>
+            </div>
+            
+              <!-- Card -->
+            <div class="w-60 p-4 bg-white rounded-xl transform transition-all hover:-translate-y-2 duration-200 shadow-lg hover:shadow-2xl">
+              <!-- Image -->
+              
+              <img class="h-30 object-cover rounded-xl w-60 h-40" src="{% static "assets/Manuel.jpg" %}" alt="Integrante Manuel Peña">
+              <div class="p-2">
+              <!-- Heading -->
+              <h2 class="font-bold text-lg mb-2 ">Manuel Peña</h2>
+              <!-- Description -->
+              <p class="text-sm text-gray-600">• Conocimientos de programación C++, Python, etc. <br>• Escucha activa <br>•Flexibilidad e innovación <br>• Responsable</p>
+              </div>
+              <!-- GitHub -->
+              <div class="m-2 text-center">
+              <a role='button' href='https://github.com/U202210138' target="_blank" class="text-white bg-blue-900 px-3 py-1 rounded-md hover:bg-blue-700">Saber más</a>
+              </div>
+            </div>
+        </div>   
+    </section>
+    
+    <footer class="bg-blue-900 text-white py-6">
+        <div class="container mx-auto text-center">
+            <p class="mb-2">Track your flights with ease</p>
+            <p>&copy; 2023 AeroTrack</p>
+        </div>
+    </footer>
+</body>
+</html>

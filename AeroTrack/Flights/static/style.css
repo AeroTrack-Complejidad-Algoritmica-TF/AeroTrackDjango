@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.space-grotesk{
+    font-family: "Space Grotesk", system-ui;
+}
+
+.toolbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #5dbecf;
+    color: white;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 24px;
+}
+.toolbar a{
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+    padding: 10px;
+    text-decoration: none;
+}
+.footer{
+    background-color: #5dbecf;
+    color: white;
+    text-align: center;
+    padding: 30px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+#rutaImagenContainer {
+    display: none; 
+    text-align: center;
+
+}
+#rutaImagenContainer img {
+
+    height: auto;
+}
