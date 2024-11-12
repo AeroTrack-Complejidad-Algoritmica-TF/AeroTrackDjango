@@ -33,4 +33,4 @@ Dentro de la terminal del venv (saldra un (venv) al inicio del todo)
 
 `pip install -r .\requirements.txt`
 
-`py .\manage.py migrate`
+`py .\manage.py runserver`
