@@ -48,40 +48,35 @@
     </section>    
 
     <div class="">
-    
-        <!-- Contenedor principal -->
         <main class="flex justify-center py-10">
             <div class="w-full max-w-screen-lg bg-white p-8 rounded-lg shadow-md">
-                <!-- Título y Descripción -->
                 <h1 class="text-center text-2xl font-bold mb-6">¡Bienvenido! Ingrese su aeropuerto y a donde desea viajar</h1>
     
-                <!-- Inputs y Botón -->
                 <div class="flex items-center justify-center space-x-4 mb-6">
                     <!-- Input Aeropuerto Origen -->
                     <div class="flex items-center space-x-2">
                         <label for="origen" class="font-semibold">Aeropuerto Origen:</label>
                         <select id="origen" class="border border-gray-300 rounded-lg p-2">
-                            <option>Aeropuerto AER</option>
-                            <option>Aeropuerto B</option>
-                            <!-- Más opciones -->
+                            {% for source_airport in source_airports %}
+                                <option value="{{ source_airport }}">Aeropuerto {{ source_airport }}</option>
+                            {% endfor %}
                         </select>
                     </div>
     
-                    <!-- Flecha o icono entre los inputs -->
-                    <div class="text-gray-600 text-2xl">→</div>
+                    <div class="text-2xl">→</div>
     
                     <!-- Input Aeropuerto Destino -->
                     <div class="flex items-center space-x-2">
                         <label for="destino" class="font-semibold">Aeropuerto Destino:</label>
                         <select id="destino" class="border border-gray-300 rounded-lg p-2">
-                            <option>Aeropuerto POS</option>
-                            <option>Aeropuerto Y</option>
-                            <!-- Más opciones -->
+                            {% for destination_airport in destination_airports %}
+                                <option value="{{ destination_airport }}">Aeropuerto {{ destination_airport }}</option>
+                            {% endfor %}
                         </select>
                     </div>
     
                     <!-- Botón de buscar ruta -->
-                    <button onclick="mostrarRutaImagen()" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                    <button onclick="redirectToRoute()" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300">
                         Buscar Ruta
                     </button>
                 </div>
@@ -110,19 +105,24 @@
                 </div>
             </div>
         </main>
+        {% if origen and target %}
         <div class="flex justify-center items-center">
-            <div id="rutaImagenContainer">
-                <img id="rutaImagen" src="{% static "assets/grafo de AER a POS.jpg" %}" alt="Imagen de la Ruta">
-            </div>
-
             <div class="w-1/2">
                 <img src="{% static "graphs/graph.png" %}" alt="grafo generado">
             </div>
         </div>
+        {% endif %}
+
         <script>
-            function mostrarRutaImagen() {
-                const rutaImagenContainer = document.getElementById("rutaImagenContainer");
-                rutaImagenContainer.style.display = "block";
+            function redirectToRoute() {
+                const origen = document.getElementById('origen').value;
+                const destino = document.getElementById('destino').value;
+        
+                if (origen && destino) {
+                    window.location.href = `/flights/${origen}/${destino}/`;
+                } else {
+                    alert("Por favor, selecciona tanto el aeropuerto de origen como el de destino.");
+                }
             }
         </script>
         

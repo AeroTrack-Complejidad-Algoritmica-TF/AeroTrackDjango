@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import math
 from django.conf import settings
 
-def generate_graph():
+def generate_graph(origen, target):
     file_path = os.path.join(settings.BASE_DIR, 'Flights', 'routes.csv')
     df = pd.read_csv(file_path)
 
@@ -44,8 +44,6 @@ def generate_graph():
     def RutaAstar(grafo, nodo_inicio, nodo_final):
         return nx.astar_path(grafo, source=nodo_inicio, target=nodo_final, heuristic=heuristic, weight='weight')
 
-    origen = 'AER'
-    target = 'POS'
     ruta_mas_corta = RutaAstar(G, origen, target)
 
     GNEW = nx.DiGraph()
@@ -55,29 +53,24 @@ def generate_graph():
             break
         GNEW.add_edge(nodes, ruta_mas_corta[ruta_mas_corta.index(nodes) + 1], weight=G.get_edge_data(nodes, ruta_mas_corta[ruta_mas_corta.index(nodes) + 1])['weight'])
 
-    #pos = nx.kamada_kawai_layout(GNEW)
-    #plt.figure(figsize=(12, 12))
-    #nx.draw_networkx(GNEW, with_labels=True, node_size=100, node_color="skyblue", font_size=5, font_color="black", font_weight="normal", edge_color="gray", pos=pos)
-    #labels = nx.get_edge_attributes(GNEW, 'weight')
-    #nx.draw_networkx_edge_labels(GNEW, pos, edge_labels=labels)
-    
+
     pos = nx.kamada_kawai_layout(GNEW)
-    plt.figure(figsize=(14, 14))  # Tamaño del gráfico más grande
+    plt.figure(figsize=(14, 14)) 
     nx.draw_networkx(
         GNEW,
         pos=pos,
         with_labels=True,
-        node_size=500,  # Tamaño de los nodos incrementado
-        node_color="green",  # Color de los nodos en verde
-        font_size=10,  # Tamaño de la fuente mayor para mejor visibilidad
-        font_color="white",  # Color de las letras en blanco
-        font_weight="bold",  # Letras en negrita para mayor visibilidad
-        edge_color="gray"  # Color de las aristas en gris
+        node_size=500,  
+        node_color="green", 
+        font_size=10,  
+        font_color="white", 
+        font_weight="bold", 
+        edge_color="gray"  
     )
 
     # Agregar etiquetas de peso a las aristas
     labels = nx.get_edge_attributes(GNEW, 'weight')
-    nx.draw_networkx_edge_labels(GNEW, pos, edge_labels=labels, font_size=8, font_color="black")  # Tamaño de fuente para etiquetas de aristas
+    nx.draw_networkx_edge_labels(GNEW, pos, edge_labels=labels, font_size=8, font_color="black")  
 
 
     # Guardar la imagen en el directorio 'graphs'
@@ -89,7 +82,29 @@ def generate_graph():
     image_path = os.path.join(static_dir, 'graphs' ,'graph.png')
     plt.savefig(image_path)
     plt.close()
+    
+def upload_source_airports():
+    file_path = os.path.join(settings.BASE_DIR, 'Flights', 'routes.csv')
+    df = pd.read_csv(file_path)
+    df.columns = df.columns.str.strip()
 
+    if 'source airport' not in df.columns:
+        raise ValueError("La columna 'source airport' no se encuentra en el archivo CSV. Nombres encontrados: {}".format(df.columns))
+    return df['source airport'].drop_duplicates().sort_values().tolist()
+
+
+def upload_destination_airports():
+    file_path = os.path.join(settings.BASE_DIR, 'Flights', 'routes.csv')
+    df = pd.read_csv(file_path)
+    df.columns = df.columns.str.strip()
+
+    if 'destination apirport' not in df.columns:
+        raise ValueError("La columna 'destination apirport' no se encuentra en el archivo CSV. Nombres encontrados: {}".format(df.columns))
+    return df['destination apirport'].drop_duplicates().sort_values().tolist()
+
+
+    
+    
 # Create your views here.
 def IndexView(request):
     return render(request, "index.html")
@@ -97,6 +112,17 @@ def IndexView(request):
 def AboutView(request):
     return render(request, "about.html")
 
-def FlightsView(request):
-    generate_graph()
-    return render(request, "flights.html")
+def FlightsView(request, origen=None, target=None):
+    source_airports = upload_source_airports()
+    destination_airports = upload_destination_airports()
+
+    if origen and target:
+        generate_graph(origen, target)
+
+    context = {
+        "source_airports": source_airports,
+        "destination_airports": destination_airports,
+        "origen": origen,
+        "target": target,
+    }
+    return render(request, "flights.html", context)
