@@ -1,29 +1,39 @@
+"""
+
+import os
+import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 from geopy.distance import geodesic
-from Flights.models import AirportRoute
+import ast
 from django.conf import settings
-import os
+
+from Flights.models import AirportRoute
 
 
 def generate_graph(origen, target):
-    # Crear el grafo
-    G = nx.DiGraph()
+    file_path = os.path.join(settings.BASE_DIR, 'Flights', 'airport_routes.csv')
+    df = pd.read_csv(file_path)
 
-    # Consultar todas las rutas de la base de datos
-    routes = AirportRoute.objects.all()
+    df.columns = df.columns.str.strip()
+    df = df.rename(columns={"destination airport": "destination airport"})
+    df = df.sort_values(by=['source airport', 'destination airport'])
+
+    df['source_coords'] = df['source coords'].apply(ast.literal_eval)
+    df['destination_coords'] = df['destination coords'].apply(ast.literal_eval)
+
+    G = nx.DiGraph()
 
     def heuristic(a, b):
         coords_1 = G.nodes[a]['coordinates']
         coords_2 = G.nodes[b]['coordinates']
         return geodesic(coords_1, coords_2).kilometers
 
-    # Construir el grafo desde la base de datos
-    for route in routes:
-        source = route.source_airport
-        destination = route.destination_airport
-        source_coords = eval(route.source_coords)  # Convertir de string a tuple
-        destination_coords = eval(route.destination_coords)
+    for _, row in df.iterrows():
+        source = row['source airport']
+        destination = row['destination airport']
+        source_coords = row['source_coords']
+        destination_coords = row['destination_coords']
 
         if G.has_edge(source, destination):
             G[source][destination]['weight'] += 1
@@ -33,11 +43,9 @@ def generate_graph(origen, target):
             G.add_node(source, coordinates=source_coords)
         if not G.has_node(destination):
             G.add_node(destination, coordinates=destination_coords)
-
-        distance = geodesic(source_coords, destination_coords).kilometers
+        distance = heuristic(source, destination)
         G.add_edge(source, destination, weight=distance.__round__(2))
 
-    # Algoritmo de A* para encontrar la ruta más corta
     def RutaAstar(grafo, nodo_inicio, nodo_final):
         rutas_validas = nx.astar_path(
             grafo, source=nodo_inicio, target=nodo_final, heuristic=heuristic, weight='weight'
@@ -45,22 +53,15 @@ def generate_graph(origen, target):
         distancia = nx.astar_path_length(
             grafo, source=nodo_inicio, target=nodo_final, heuristic=heuristic, weight='weight'
         )
-        print(f"EL mínimo de saltos es {len(rutas_validas)}. Ruta corta: {rutas_validas}, distancia: {distancia} km")
+        print(f"EL minimo de saltos es {len(rutas_validas)}. Ruta corta: {rutas_validas}, distancia: {distancia} km")
         return rutas_validas, distancia
 
-    # Verificar si los nodos están en el grafo
-    if origen not in G or target not in G:
-        raise ValueError(f"No hay rutas disponibles entre {origen} y {target}")
-
-    # Encontrar la ruta más corta
     ruta_mas_corta, distancia_total = RutaAstar(G, origen, target)
 
-    # Información para retornar
     saltos_min = len(ruta_mas_corta)
     ruta_minima = ruta_mas_corta
     distancia_kilometros = round(distancia_total, 2)
 
-    # Crear un nuevo grafo para la ruta mínima
     GNEW = nx.DiGraph()
     for nodes in ruta_mas_corta:
         GNEW.add_node(nodes)
@@ -72,7 +73,6 @@ def generate_graph(origen, target):
             weight=G.get_edge_data(nodes, ruta_mas_corta[ruta_mas_corta.index(nodes) + 1])['weight'],
         )
 
-    # Dibujar el grafo de la ruta mínima
     pos = nx.kamada_kawai_layout(GNEW)
     plt.figure(figsize=(14, 14))
     nx.draw_networkx(
@@ -91,7 +91,6 @@ def generate_graph(origen, target):
     nx.draw_networkx_edge_labels(GNEW, pos, edge_labels=labels, font_size=8, font_color="black")
     plt.title(f"Grafo de {origen} a {target}")
 
-    # Guardar la imagen en el directorio 'graphs'
     static_dir = os.path.join(settings.BASE_DIR, 'Flights', 'static')
     if not os.path.exists(static_dir):
         os.makedirs(static_dir)
@@ -103,11 +102,25 @@ def generate_graph(origen, target):
     return saltos_min, ruta_minima, distancia_kilometros
 
 
+
+    
 def upload_source_airports():
-    # Obtener aeropuertos origen únicos de la base de datos
-    return AirportRoute.objects.values_list('source_airport', flat=True).distinct()
+    file_path = os.path.join(settings.BASE_DIR, 'Flights', 'airport_routes.csv')
+    df = pd.read_csv(file_path)
+    df.columns = df.columns.str.strip()
+
+    if 'source airport' not in df.columns:
+        raise ValueError("La columna 'source airport' no se encuentra en el archivo CSV. Nombres encontrados: {}".format(df.columns))
+    return df['source airport'].drop_duplicates().sort_values().tolist()
 
 
 def upload_destination_airports():
-    # Obtener aeropuertos destino únicos de la base de datos
-    return AirportRoute.objects.values_list('destination_airport', flat=True).distinct()
+    file_path = os.path.join(settings.BASE_DIR, 'Flights', 'airport_routes.csv')
+    df = pd.read_csv(file_path)
+    df.columns = df.columns.str.strip()
+
+    if 'destination airport' not in df.columns:
+        raise ValueError("La columna 'destination airport' no se encuentra en el archivo CSV. Nombres encontrados: {}".format(df.columns))
+    return df['destination airport'].drop_duplicates().sort_values().tolist()
+
+"""
