@@ -3,12 +3,6 @@ from django.shortcuts import render
 import matplotlib
 matplotlib.use('Agg')
 
-import os
-import pandas as pd
-import networkx as nx
-import matplotlib.pyplot as plt
-from geopy.distance import geodesic
-import ast
 from django.conf import settings
 from .graphs_logic import *
 
@@ -29,8 +23,6 @@ def FlightsView(request, origen=None, target=None):
     if origen and target:
         saltos_min, ruta_minima, distancia_kilometros = generate_graph(origen, target)
         
-        
-        
         if 'historial_busquedas' not in request.session:
             request.session['historial_busquedas'] = []
         # Agregar nueva búsqueda al historial
@@ -44,9 +36,11 @@ def FlightsView(request, origen=None, target=None):
         # Evitar duplicados
         if nueva_busqueda not in request.session['historial_busquedas']:
             request.session['historial_busquedas'].append(nueva_busqueda)
-            # Persistir el cambio en la sesión
+            request.session['historial_busquedas'] = request.session['historial_busquedas'][-5:]
             request.session.modified = True
             
+    historial_invertido = request.session.get('historial_busquedas', [])[::-1]
+
 
     context = {
         "source_airports": source_airports,
@@ -56,6 +50,6 @@ def FlightsView(request, origen=None, target=None):
         "saltos_min": saltos_min,
         "ruta_minima": ruta_minima,
         "distancia_kilometros": distancia_kilometros,
-        "historial_busquedas": request.session.get('historial_busquedas', []),
+        "historial_busquedas": historial_invertido,
     }
     return render(request, "flights.html", context)

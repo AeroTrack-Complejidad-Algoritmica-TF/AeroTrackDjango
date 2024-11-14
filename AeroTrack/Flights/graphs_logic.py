@@ -48,14 +48,11 @@ def generate_graph(origen, target):
         print(f"EL mínimo de saltos es {len(rutas_validas)}. Ruta corta: {rutas_validas}, distancia: {distancia} km")
         return rutas_validas, distancia
 
-    # Verificar si los nodos están en el grafo
     if origen not in G or target not in G:
         raise ValueError(f"No hay rutas disponibles entre {origen} y {target}")
 
-    # Encontrar la ruta más corta
     ruta_mas_corta, distancia_total = RutaAstar(G, origen, target)
 
-    # Información para retornar
     saltos_min = len(ruta_mas_corta)
     ruta_minima = ruta_mas_corta
     distancia_kilometros = round(distancia_total, 2)
@@ -79,19 +76,24 @@ def generate_graph(origen, target):
         GNEW,
         pos=pos,
         with_labels=True,
-        node_size=500,
+        node_size=7000,
         node_color="green",
-        font_size=10,
+        font_size=30,
         font_color="white",
         font_weight="bold",
         edge_color="gray",
+        width=2.5 
     )
 
     labels = nx.get_edge_attributes(GNEW, 'weight')
-    nx.draw_networkx_edge_labels(GNEW, pos, edge_labels=labels, font_size=8, font_color="black")
-    plt.title(f"Grafo de {origen} a {target}")
-
-    # Guardar la imagen en el directorio 'graphs'
+    nx.draw_networkx_edge_labels(
+        GNEW,
+        pos,
+        edge_labels=labels,
+        font_size=15,  
+        font_color="blue" 
+    )
+    
     static_dir = os.path.join(settings.BASE_DIR, 'Flights', 'static')
     if not os.path.exists(static_dir):
         os.makedirs(static_dir)
@@ -104,10 +106,8 @@ def generate_graph(origen, target):
 
 
 def upload_source_airports():
-    # Obtener aeropuertos origen únicos de la base de datos
     return AirportRoute.objects.values_list('source_airport', flat=True).distinct()
 
 
 def upload_destination_airports():
-    # Obtener aeropuertos destino únicos de la base de datos
     return AirportRoute.objects.values_list('destination_airport', flat=True).distinct()

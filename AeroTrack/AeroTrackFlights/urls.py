@@ -11,5 +11,5 @@ urlpatterns = [
     path('', IndexView),
     path('about/', AboutView),
     path('flights/', FlightsView),
-    path('flights/<str:origen>/<str:target>/', FlightsView),
+    path('flights/<str:origen>/<str:target>/', FlightsView, name='flights_view'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

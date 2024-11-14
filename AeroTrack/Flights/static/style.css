@@ -47,3 +47,11 @@
 
     height: auto;
 }
+
+.bg-\[url\(\'\/assets\/hero-image\.jpg\'\)\]{
+    background-image: url('/static/assets/hero-image.jpg');
+  }
+  
+  .bg-\[url\(\'\/assets\/about-heroimage\.png\'\)\]{
+    background-image: url('/static/assets/about-heroimage.png');
+  }

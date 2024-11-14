@@ -34,3 +34,7 @@ Dentro de la terminal del venv (saldra un (venv) al inicio del todo)
 `pip install -r .\requirements.txt`
 
 `py .\manage.py runserver`
+
+Correr en otra terminal para desarrollo HTML
+
+`npx tailwindcss -i ./Flights/static/style.css -o ./Flights/static/tailwind.css --watch`

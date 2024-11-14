@@ -86,21 +86,31 @@
                 <div class="overflow-x-auto mt-6">
                     <table class="min-w-full bg-gray-200 rounded-lg shadow">
                         <thead>
-                            <tr class="bg-blue-500 text-white">
+                            <tr class="bg-blue-500 text-white rounded-t-md">
                                 <th class="p-4 text-left">Aeropuerto Origen</th>
                                 <th class="p-4 text-left">Aeropuerto Destino</th>
                                 <th class="p-4 text-left">Saltos Mínimos</th>
                                 <th class="p-4 text-left">Distancia (km)</th>
                             </tr>
                         </thead>
-                        <tbody class="text-gray-700">
+                        <tbody class="text-gray-700 rounded-b-md">
                             {% if historial_busquedas %}
                                 {% for busqueda in historial_busquedas %}
-                                    <tr class="border-b">
-                                        <td class="p-4">{{ busqueda.origen }}</td>
-                                        <td class="p-4">{{ busqueda.target }}</td>
-                                        <td class="p-4">{{ busqueda.saltos_min }}</td>
-                                        <td class="p-4">{{ busqueda.distancia_kilometros }}</td>
+                                    <tr class="border-b hover:bg-slate-500 cursor-pointer">
+                                        <a href="{% url 'flights_view' busqueda.origen busqueda.target %}">
+                                            <td class="p-4">
+                                                <a href="{% url 'flights_view' busqueda.origen busqueda.target %}" class="hover:underline">
+                                                    {{ busqueda.origen }}
+                                                </a>
+                                            </td>
+                                            <td class="p-4">
+                                                <a href="{% url 'flights_view' busqueda.origen busqueda.target %}" class="hover:underline">
+                                                    {{ busqueda.target }}
+                                                </a>
+                                            </td>
+                                            <td class="p-4">{{ busqueda.saltos_min }}</td>
+                                            <td class="p-4">{{ busqueda.distancia_kilometros }}</td>
+                                        </a>
                                     </tr>
                                 {% endfor %}
                             {% else %}
@@ -113,34 +123,46 @@
                 </div>
             </div>
         </main>
-        {% if origen and target %}
-        <div class="flex justify-center items-center">
-            <div class="w-1/2">
-                <img src="{% static "graphs/graph.png" %}" alt="grafo generado">
-            </div>
-        </div>
-        {% else %}
-        <div class="flex justify-center items-center">
-            <h1>Por favor, seleccione un origen y destino para visualizar la ruta</h1>
-        </div>
-        {% endif %}
 
-        {% if saltos_min and ruta_minima and distancia_kilometros%}
-            <div class="text-center mt-4">
-                <p class="text-lg font-semibold">Saltos minimos: {{ saltos_min }}</p>
-            </div>
-            <div class="text-center mt-4">
-                <p class="text-lg font-semibold">Ruta a seguir: {{ ruta_minima }}</p>
-            </div>
-            <div class="text-center mt-4">
-                <p class="text-lg font-semibold">Distancia: {{ distancia_kilometros }}</p>
-            </div>
-        {% else %}
-        <div class="flex justify-center items-center">
-            <h1>No se ha seleccionado una ruta para mostrar informacion</h1>
-        </div>
-        {% endif %}
+        <main class="flex justify-center">
+            {% if saltos_min and ruta_minima and distancia_kilometros%}
+                <div class="w-full max-w-screen-lg bg-white p-8 rounded-lg shadow-md">
+                    
+                    <div class="grid grid-cols-3 gap-8">
+                        <div class="text-center bg-slate-700 rounded-md p-4 items-center">
+                            <p class="text-lg font-semibold text-white">Saltos minimos:</p>
+                            <p class="text-lg font-semibold text-white">{{ saltos_min }}</p>
+                        </div>
+                        <div class="text-center bg-slate-700 rounded-md p-4 items-center">
+                            <p class="text-lg font-semibold text-white">Ruta a seguir:</p>
+                            <p class="text-lg font-semibold text-white">{{ ruta_minima }}</p>
+                        </div>
+                        <div class="text-center bg-slate-700 rounded-md p-4 items-center">
+                            <p class="text-lg font-semibold text-white">Distancia:</p>
+                            <p class="text-lg font-semibold text-white">{{ distancia_kilometros }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if origen and target %}
+                        <div class="flex justify-center items-center">
+                            <div class="w-1/2">
+                                <img src="{% static "graphs/graph.png" %}" alt="grafo generado">
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="flex justify-center items-center">
+                            <h1>Por favor, seleccione un origen y destino para visualizar la ruta</h1>
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="flex justify-center items-center">
+                    <h1>No se ha seleccionado una ruta para mostrar informacion</h1>
+                </div>
+            {% endif %}
+        </main>
 
+        
 
         <script>
             function redirectToRoute() {
