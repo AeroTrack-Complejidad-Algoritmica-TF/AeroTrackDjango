@@ -46,6 +46,10 @@ def generate_graph(origen, target):
     print(f"Ruta mínima: {rutas_validas}, Saltos mínimos: {saltos_min}, Distancia: {distancia} km")        
     
     flow_value, flow_dict = nx.maximum_flow(G, origen, target, capacity="capacity")
+    for u, v in G.edges():
+        if flow_dict[u][v] > 0:
+            print(f"Flujo de {u} a {v}: {flow_dict[u][v]} / {G[u][v]['capacity']}")
+
     print(f"Flujo máximo: {flow_value}, Ruta aproximada: {rutas_validas}, Distancia: {distancia} km")
     
     GNEW = nx.DiGraph()
@@ -63,14 +67,14 @@ def generate_graph(origen, target):
 
     for node in GNEW.nodes(data=True):
         coords = node[1]['coordinates']
-        icon = folium.CustomIcon(icon_url, icon_size=(30, 30))
+        iconCustom = folium.CustomIcon(icon_url, icon_size=(30, 30))
 
         if node[0] == origen:
             folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='green')).add_to(m)
         elif node[0] == target:
             folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='red')).add_to(m)
         else:
-            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='blue')).add_to(m)
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon = folium.Icon()).add_to(m)
 
     for edge in GNEW.edges(data=True):
         coords_1 = GNEW.nodes[edge[0]]['coordinates']
@@ -98,14 +102,18 @@ def generate_graph(origen, target):
     
     for node in GNEW_FLOW.nodes(data=True):
         coords = GNEW_FLOW.nodes[node[0]]['coordinates']
-        icon = folium.CustomIcon(icon_url, icon_size=(30, 30))
         if node[0] == origen:
-            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='green')).add_to(m_flow)
+            capacity_info = f"{sum(G[u][v]['capacity'] for u, v in G.edges(node[0]) if flow_dict[u][v] > 0)}"  # Suma de las capacidades de las aristas salientes del nodo origen
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}<br>{flow_value}/{capacity_info}", icon=folium.Icon(color='green')).add_to(m_flow)
         elif node[0] == target:
-            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='red')).add_to(m_flow)
+            flow_info = f"Flujo: {sum(flow_dict[u][node[0]] for u in G.predecessors(node[0]) if flow_dict[u][node[0]] > 0)}"  # Suma de los flujos entrantes del nodo destino
+            capacity_info = f"{sum(G[u][v]['capacity'] for u, v in G.in_edges(node[0]) if flow_dict[u][v] > 0)}"  # Suma de las capacidades de las aristas entrantes del nodo destino
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}<br>{flow_info}/{capacity_info}", icon=folium.Icon(color='red')).add_to(m_flow)
         else:
-            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='blue')).add_to(m_flow)
-            
+            flow_info = f"Flujo: {sum(flow for flow in flow_dict[node[0]].values() if flow > 0)}"  # Suma de los flujos salientes del nodo intermedio
+            capacity_info = f"{sum(G[u][v]['capacity'] for u, v in G.edges(node[0]) if flow_dict[u][v] > 0)}"  # Suma de las capacidades de las aristas salientes del nodo intermedio
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}<br>{flow_info}/{capacity_info}", icon=folium.Icon()).add_to(m_flow)
+        
     for u, v, data in GNEW_FLOW.edges(data=True):
         coords_1 = GNEW_FLOW.nodes[u]['coordinates']
         coords_2 = GNEW_FLOW.nodes[v]['coordinates']
