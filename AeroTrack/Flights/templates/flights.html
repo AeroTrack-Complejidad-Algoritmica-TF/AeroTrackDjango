@@ -53,7 +53,6 @@
                 <h1 class="text-center text-2xl font-bold mb-6">¡Bienvenido! Ingrese su aeropuerto y a donde desea viajar</h1>
     
                 <div class="flex items-center justify-center space-x-4 mb-6">
-                    <!-- Input Aeropuerto Origen -->
                     <div class="flex items-center space-x-2">
                         <label for="origen" class="font-semibold">Aeropuerto Origen:</label>
                         <select id="origen" class="border border-gray-300 rounded-lg p-2">
@@ -65,7 +64,6 @@
     
                     <div class="text-2xl">→</div>
     
-                    <!-- Input Aeropuerto Destino -->
                     <div class="flex items-center space-x-2">
                         <label for="destino" class="font-semibold">Aeropuerto Destino:</label>
                         <select id="destino" class="border border-gray-300 rounded-lg p-2">
@@ -76,17 +74,16 @@
                     </div>
     
                     <!-- Botón de buscar ruta -->
-                    <button onclick="redirectToRoute()" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                    <button onclick="redirectToRoute()" class="bg-blue-700 text-white p-2 rounded-lg hover:bg-blue-800 transition duration-300">
                         Buscar Ruta
                     </button>
                 </div>
 
                 
-                <!-- Tabla de resultados -->
                 <div class="overflow-x-auto mt-6">
                     <table class="min-w-full bg-gray-200 rounded-lg shadow">
                         <thead>
-                            <tr class="bg-blue-500 text-white rounded-t-md">
+                            <tr class="bg-blue-700 text-white rounded-t-md">
                                 <th class="p-4 text-left">Aeropuerto Origen</th>
                                 <th class="p-4 text-left">Aeropuerto Destino</th>
                                 <th class="p-4 text-left">Saltos Mínimos</th>
@@ -125,42 +122,63 @@
         </main>
 
         <main class="flex justify-center">
-            {% if saltos_min and ruta_minima and distancia_kilometros%}
-                <div class="w-full max-w-screen-lg bg-white p-8 rounded-lg shadow-md">
-                    
+            <div class="w-full max-w-screen-lg bg-white p-8 rounded-lg shadow-md">
+                
+                    <!-- Información de la ruta -->
                     <div class="grid grid-cols-3 gap-8">
-                        <div class="text-center bg-slate-700 rounded-md p-4 items-center">
-                            <p class="text-lg font-semibold text-white">Saltos minimos:</p>
+                        <div id="dato-ruta-minima"  class="flex flex-col justify-center items-center bg-slate-700 rounded-md p-4">
+                            <p class="text-lg font-semibold text-white">Saltos mínimos:</p>
                             <p class="text-lg font-semibold text-white">{{ saltos_min }}</p>
                         </div>
-                        <div class="text-center bg-slate-700 rounded-md p-4 items-center">
+                        <div id="dato-flujo-maximo" class="flex flex-col justify-center items-center bg-slate-700 rounded-md p-4 text-center hidden">
+                            <p class="text-lg font-semibold text-white">Flujo Maximo:</p>
+                            <p class="text-lg font-semibold text-white">{{ flow_value }}</p>
+                        </div>
+
+                        <div class="flex flex-col justify-center items-center bg-slate-700 rounded-md p-4 text-center">
                             <p class="text-lg font-semibold text-white">Ruta a seguir:</p>
-                            <p class="text-lg font-semibold text-white">{{ ruta_minima }}</p>
+                            <p class="font-semibold text-white">{{ rutas_validas }}</p>
                         </div>
-                        <div class="text-center bg-slate-700 rounded-md p-4 items-center">
+                        <div class="flex flex-col justify-center items-center bg-slate-700 rounded-md p-4">
                             <p class="text-lg font-semibold text-white">Distancia:</p>
-                            <p class="text-lg font-semibold text-white">{{ distancia_kilometros }}</p>
+                            <p class="text-lg font-semibold text-white">{{ distancia_kilometros }} km</p>
                         </div>
+                        
                     </div>
-                    
-                    {% if origen and target %}
-                        <div class="flex justify-center items-center">
-                            <div class="w-1/2">
-                                <img src="{% static "graphs/graph.png" %}" alt="grafo generado">
-                            </div>
-                        </div>
-                    {% else %}
-                        <div class="flex justify-center items-center">
-                            <h1>Por favor, seleccione un origen y destino para visualizar la ruta</h1>
+                
+                {% if saltos_min and rutas_validas and distancia_kilometros %}
+
+        
+                    <div class="bg-slate-700 text-white rounded-md mt-6 grid grid-cols-2 font-bold text-2xl">
+                        <button id="btn-ruta-minima" class="flex justify-center py-4 rounded-l-md w-full bg-slate-700 transition duration-300" onclick="toggleActive('ruta-minima')">
+                            Ver ruta mínima
+                        </button>
+                        <button id="btn-flujo-maximo" class="flex justify-center py-4 rounded-r-md w-full bg-slate-700 transition duration-300" onclick="toggleActive('flujo-maximo')">
+                            Ver flujo máximo
+                        </button>
+                    </div>
+        
+                    {% if error_message %}
+                        <div class="text-red-600 font-bold text-center mt-4">
+                            {{ error_message }}
                         </div>
                     {% endif %}
-                </div>
-            {% else %}
-                <div class="flex justify-center items-center">
-                    <h1>No se ha seleccionado una ruta para mostrar informacion</h1>
-                </div>
-            {% endif %}
+        
+                    <!-- Mostrar el mapa -->
+                    <div class="flex justify-center items-center mt-6">
+                        <iframe id="mapa-ruta-minima" src="{% static 'maps/ruta_minima.html' %}" 
+                            class="w-full h-96 border rounded-lg"></iframe>
+                        <iframe id="mapa-flujo-maximo" src="{% static 'maps/flujo_maximo.html' %}" 
+                            class="w-full h-96 border rounded-lg hidden"></iframe>
+                    </div>
+                {% else %}
+                    <div class="flex justify-center items-center">
+                        <h1 class="text-lg font-semibold text-gray-800">No se ha seleccionado una ruta para mostrar información.</h1>
+                    </div>
+                {% endif %}
+            </div>
         </main>
+        
 
         
 
@@ -176,6 +194,54 @@
                 }
             }
         </script>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const btnRutaMinima = document.getElementById("btn-ruta-minima");
+                const btnFlujoMaximo = document.getElementById("btn-flujo-maximo");
+                const mapaRutaMinima = document.getElementById("mapa-ruta-minima");
+                const datoRutaMinima = document.getElementById("dato-ruta-minima");
+                const mapaFlujoMaximo = document.getElementById("mapa-flujo-maximo");
+                const datoFlujoMaximo = document.getElementById("dato-flujo-maximo");
+        
+                btnRutaMinima.addEventListener("click", () => {
+                    datoRutaMinima.classList.remove("hidden");
+                    datoFlujoMaximo.classList.add("hidden");
+                    mapaRutaMinima.classList.remove("hidden");
+                    mapaFlujoMaximo.classList.add("hidden");
+                });
+        
+                btnFlujoMaximo.addEventListener("click", () => {
+                    datoFlujoMaximo.classList.remove("hidden");
+                    datoRutaMinima.classList.add("hidden");
+                    mapaFlujoMaximo.classList.remove("hidden");
+                    mapaRutaMinima.classList.add("hidden");
+                });
+            });
+        </script>
+        
+        <script>
+            function toggleActive(mode) {
+                const btnRutaMinima = document.getElementById("btn-ruta-minima");
+                const btnFlujoMaximo = document.getElementById("btn-flujo-maximo");
+        
+                if (mode === "ruta-minima") {
+                    btnRutaMinima.classList.add("bg-blue-700");
+                    btnRutaMinima.classList.remove("bg-slate-700", "hover:bg-slate-800");
+        
+                    btnFlujoMaximo.classList.remove("bg-blue-700");
+                    btnFlujoMaximo.classList.add("bg-slate-700", "hover:bg-slate-800");
+                } else if (mode === "flujo-maximo") {
+                    btnFlujoMaximo.classList.add("bg-blue-700");
+                    btnFlujoMaximo.classList.remove("bg-slate-700", "hover:bg-slate-800");
+        
+                    btnRutaMinima.classList.remove("bg-blue-700");
+                    btnRutaMinima.classList.add("bg-slate-700", "hover:bg-slate-800");
+                }
+            }
+        </script>
+        
+        
         
     <footer class="bg-blue-900 text-white py-5 mt-32">
         <div class="container mx-auto text-center">

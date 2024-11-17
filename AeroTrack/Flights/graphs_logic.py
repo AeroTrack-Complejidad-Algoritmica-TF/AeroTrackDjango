@@ -1,16 +1,14 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 from geopy.distance import geodesic
 from Flights.models import AirportRoute
 from django.conf import settings
 import os
+import folium
 
 
 def generate_graph(origen, target):
-    # Crear el grafo
     G = nx.DiGraph()
 
-    # Consultar todas las rutas de la base de datos
     routes = AirportRoute.objects.all()
 
     def heuristic(a, b):
@@ -18,15 +16,17 @@ def generate_graph(origen, target):
         coords_2 = G.nodes[b]['coordinates']
         return geodesic(coords_1, coords_2).kilometers
 
-    # Construir el grafo desde la base de datos
+    CAPACIDAD_MAXIMA = 10
+
     for route in routes:
         source = route.source_airport
         destination = route.destination_airport
-        source_coords = eval(route.source_coords)  # Convertir de string a tuple
+        source_coords = eval(route.source_coords)
         destination_coords = eval(route.destination_coords)
 
         if G.has_edge(source, destination):
             G[source][destination]['weight'] += 1
+            G[source][destination]['capacity'] += 1
             continue
 
         if not G.has_node(source):
@@ -35,74 +35,89 @@ def generate_graph(origen, target):
             G.add_node(destination, coordinates=destination_coords)
 
         distance = geodesic(source_coords, destination_coords).kilometers
-        G.add_edge(source, destination, weight=distance.__round__(2))
-
-    # Algoritmo de A* para encontrar la ruta más corta
-    def RutaAstar(grafo, nodo_inicio, nodo_final):
-        rutas_validas = nx.astar_path(
-            grafo, source=nodo_inicio, target=nodo_final, heuristic=heuristic, weight='weight'
-        )
-        distancia = nx.astar_path_length(
-            grafo, source=nodo_inicio, target=nodo_final, heuristic=heuristic, weight='weight'
-        )
-        print(f"EL mínimo de saltos es {len(rutas_validas)}. Ruta corta: {rutas_validas}, distancia: {distancia} km")
-        return rutas_validas, distancia
+        G.add_edge(source, destination, weight=distance, capacity=1)
 
     if origen not in G or target not in G:
         raise ValueError(f"No hay rutas disponibles entre {origen} y {target}")
 
-    ruta_mas_corta, distancia_total = RutaAstar(G, origen, target)
-
-    saltos_min = len(ruta_mas_corta)
-    ruta_minima = ruta_mas_corta
-    distancia_kilometros = round(distancia_total, 2)
-
-    # Crear un nuevo grafo para la ruta mínima
-    GNEW = nx.DiGraph()
-    for nodes in ruta_mas_corta:
-        GNEW.add_node(nodes)
-        if nodes == target:
-            break
-        GNEW.add_edge(
-            nodes,
-            ruta_mas_corta[ruta_mas_corta.index(nodes) + 1],
-            weight=G.get_edge_data(nodes, ruta_mas_corta[ruta_mas_corta.index(nodes) + 1])['weight'],
-        )
-
-    # Dibujar el grafo de la ruta mínima
-    pos = nx.kamada_kawai_layout(GNEW)
-    plt.figure(figsize=(14, 14))
-    nx.draw_networkx(
-        GNEW,
-        pos=pos,
-        with_labels=True,
-        node_size=7000,
-        node_color="green",
-        font_size=30,
-        font_color="white",
-        font_weight="bold",
-        edge_color="gray",
-        width=2.5 
-    )
-
-    labels = nx.get_edge_attributes(GNEW, 'weight')
-    nx.draw_networkx_edge_labels(
-        GNEW,
-        pos,
-        edge_labels=labels,
-        font_size=15,  
-        font_color="blue" 
-    )
+    rutas_validas = nx.astar_path(G, source=origen, target=target, heuristic=heuristic, weight="weight")
+    distancia = nx.astar_path_length(G, source=origen, target=target, heuristic=heuristic, weight="weight")
+    saltos_min = len(rutas_validas) - 1
+    print(f"Ruta mínima: {rutas_validas}, Saltos mínimos: {saltos_min}, Distancia: {distancia} km")        
     
-    static_dir = os.path.join(settings.BASE_DIR, 'Flights', 'static')
+    flow_value, flow_dict = nx.maximum_flow(G, origen, target, capacity="capacity")
+    print(f"Flujo máximo: {flow_value}, Ruta aproximada: {rutas_validas}, Distancia: {distancia} km")
+    
+    GNEW = nx.DiGraph()
+    for i in range(len(rutas_validas) - 1):
+        source = rutas_validas[i]
+        destination = rutas_validas[i + 1]
+        GNEW.add_node(source, coordinates=G.nodes[source]['coordinates'])
+        GNEW.add_node(destination, coordinates=G.nodes[destination]['coordinates'])
+        if G.has_edge(source, destination):
+            GNEW.add_edge(source, destination, weight=G.get_edge_data(source, destination).get('weight', 1))
+
+    m = folium.Map(location=[20, 0], zoom_start=1)
+
+    icon_url = 'https://i.imgur.com/JrTNVat.png'
+
+    for node in GNEW.nodes(data=True):
+        coords = node[1]['coordinates']
+        icon = folium.CustomIcon(icon_url, icon_size=(30, 30))
+
+        if node[0] == origen:
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='green')).add_to(m)
+        elif node[0] == target:
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='red')).add_to(m)
+        else:
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='blue')).add_to(m)
+
+    for edge in GNEW.edges(data=True):
+        coords_1 = GNEW.nodes[edge[0]]['coordinates']
+        coords_2 = GNEW.nodes[edge[1]]['coordinates']
+        folium.PolyLine(locations=[coords_1, coords_2], color='blue', weight=2.5, opacity=1).add_to(m)
+        
+    static_dir = os.path.join(settings.BASE_DIR, 'Flights', 'static', 'maps')
     if not os.path.exists(static_dir):
         os.makedirs(static_dir)
+        
+    map_path1 = os.path.join(static_dir, "ruta_minima.html")
+    m.save(map_path1)
+        
+        
+    GNEW_FLOW = nx.DiGraph()
+    for u, v, data in G.edges(data=True):
+        if flow_dict[u][v] > 0:
+            if not GNEW_FLOW.has_node(u):
+                GNEW_FLOW.add_node(u, coordinates=G.nodes[u]['coordinates'])
+            if not GNEW_FLOW.has_node(v):
+                GNEW_FLOW.add_node(v, coordinates=G.nodes[v]['coordinates'])
+            GNEW_FLOW.add_edge(u, v, weight=data['weight'], flow=flow_dict[u][v])
+            
+    m_flow = folium.Map(location=[20, 0], zoom_start=1)
+    
+    for node in GNEW_FLOW.nodes(data=True):
+        coords = GNEW_FLOW.nodes[node[0]]['coordinates']
+        icon = folium.CustomIcon(icon_url, icon_size=(30, 30))
+        if node[0] == origen:
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='green')).add_to(m_flow)
+        elif node[0] == target:
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='red')).add_to(m_flow)
+        else:
+            folium.Marker(location=coords, popup=f"{node[0]}: {coords}", icon=folium.Icon(color='blue')).add_to(m_flow)
+            
+    for u, v, data in GNEW_FLOW.edges(data=True):
+        coords_1 = GNEW_FLOW.nodes[u]['coordinates']
+        coords_2 = GNEW_FLOW.nodes[v]['coordinates']
+        color = 'red' if data['flow'] >= G[u][v]['capacity'] else 'blue'
+        folium.PolyLine(locations=[coords_1, coords_2], color=color, weight=2.5, opacity=1).add_to(m_flow)
 
-    image_path = os.path.join(static_dir, 'graphs', 'graph.png')
-    plt.savefig(image_path)
-    plt.close()
 
-    return saltos_min, ruta_minima, distancia_kilometros
+    """Guardar el mapa"""
+    map_path2 = os.path.join(static_dir, "flujo_maximo.html")
+    m_flow.save(map_path2)
+
+    return saltos_min, rutas_validas, round(distancia, 2), flow_value, "maps/ruta_minima.html", "maps/flujo_maximo.html"
 
 
 def upload_source_airports():
